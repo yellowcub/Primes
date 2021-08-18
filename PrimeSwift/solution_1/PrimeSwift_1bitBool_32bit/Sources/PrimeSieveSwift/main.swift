@@ -7,6 +7,7 @@ struct BooleanBitArray {
     let wordArraySize: Int
     private let wordSize: Int = 8*MemoryLayout<Word>.size
     private let log2_wordSize = 8*MemoryLayout<Word>.size &- 1 &- Word(8*MemoryLayout<Word>.size).leadingZeroBitCount
+    private let wordOne = Word(1)
     
     private let words: UnsafeMutableBufferPointer<Word>
     
@@ -32,17 +33,17 @@ struct BooleanBitArray {
 
     @inline(__always) func getBit(at index: Int) -> Bool {
         let (i, m) = maskIndex(at: index)
-        return (words[i] & (Word(1) &<< m) ) != 0
+        return (words[i] & (wordOne &<< m) ) != 0
     }
 
     @inline(__always) func setBit(at index: Int) {
         let (i, m) = maskIndex(at: index)
-        words[i] |= (Word(1) &<< m)
+        words[i] |= (wordOne &<< m)
     }
 
     @inline(__always) func clearBit(at index: Int) {
         let (i, m) = maskIndex(at: index)
-        words[i] &= ~(Word(1) &<< m)
+        words[i] &= ~(wordOne &<< m)
     }
 
 }
@@ -93,12 +94,13 @@ class Sieve {
             
             let factor = number(at: factorIndex)
             var nonPrimeIndex = index(for: factor &* factor)
-            
-            repeat {
+                        
+            while nonPrimeIndex <= nonPrimeIndexLimit {
                 primeArray.clearBit(at: nonPrimeIndex)
                 nonPrimeIndex &+= factor
-            } while ( nonPrimeIndex <= nonPrimeIndexLimit )
-        } while factorIndex < factorIndexLimit
+            }
+            
+        } while factorIndex <= factorIndexLimit
     }
 
 }
